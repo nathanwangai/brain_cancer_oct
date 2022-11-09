@@ -1,0 +1,5 @@
+histology/
+raw_data/
+segmentation_data/
+testing_data/
+training_data/
