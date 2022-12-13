@@ -4,11 +4,11 @@ refractive_index_in_tissue=1.40;
 resized_z = 512;
 
 % folder of OCT scans of ~8 regions of a patient's brain
-cd("D:\testing_set\cancer\4-12-2021-WM2-0")
-data_folder = "D:\testing_set\";
-data_label = "cancer\"; % "cancer" or "non_cancer"
+cd("D:\testingdata_vari_depth\Testing_Data\2_NW_VariDepth")
+data_folder = "E:\OneDrive - Johns Hopkins\brain_cancer_oct\segmentation_data\scan_height\";
+data_label = "S2_T1\"; % "cancer" or "non_cancer"
 parent_folder = append(data_folder, data_label);
-patient_id = '4-12-2021-WM2-0';
+patient_id = '';
 ofolder2=append(parent_folder, patient_id); % where the processed B-frames are stored
 
 fheader=dir('*.header.tiff');

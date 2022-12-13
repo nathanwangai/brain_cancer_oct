@@ -91,17 +91,17 @@ class EnsembleMLP(tf.keras.Model):
 		return self.result(x)
 
 # load all models
-bframe_model = tf.keras.models.load_model("D:\\brain_cancer_oct\saved_models\CNN_bframe")
+bframe_model = tf.keras.models.load_model("saved_models\\CNN_bframe")
 bframe_cnn = BFrameCNN(3, 'relu', 'same')
 bframe_cnn.set_weights(bframe_model.get_weights())
 bframe_embedding_cnn = bframe_cnn.get_intermediate("embedding")
 
-texture_model = tf.keras.models.load_model("D:\\brain_cancer_oct\saved_models\CNN_texture")
+texture_model = tf.keras.models.load_model("saved_models\\CNN_texture")
 texture_cnn = TextureCNN(3, 'relu', 'same')
 texture_cnn.set_weights(texture_model.get_weights())
 texture_embedding_cnn = texture_cnn.get_intermediate("embedding")
 
-ensemble_model = tf.keras.models.load_model("D:\\brain_cancer_oct\saved_models\ensemble_MLP")
+ensemble_model = tf.keras.models.load_model("saved_models\\ensemble_MLP")
 ensemble_mlp = EnsembleMLP()
 ensemble_mlp.set_weights(ensemble_model.get_weights())
 
