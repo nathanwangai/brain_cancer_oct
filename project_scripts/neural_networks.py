@@ -6,15 +6,13 @@ See Figure 2 of the manuscript for a diagram of the ensemble architecture (https
 ----- Contents of this file -----
 B_frame_CNN: convolutional neural network for B-frame slices
 texture_CNN: convolutional neural network for texture slices
-ensemble_MLP: multi-layer perceptron for combining B_frame_CNN and texture_CNN embeddings
+ensemble_MLP: multi-layer perceptron for concatenated B_frame_CNN and texture_CNN embeddings
 
 ----- Methods -----
-- __init__(): initialize network layers*
-- call(): define how the network layers are connected*
-- model(): helper function to build the network graph
+- __init__(): initialize network layers (requried by sub-classed TensorFlow models)
+- call(): define how the network layers are connected (requried by sub-classed TensorFlow models)
+- model(): builds the network graph, which is required before extracting intermediate activations
 - get_embedding() and get_gradcam(): returns the activation of intermediate network layers (embeddings)
-
-* Requried by sub-classed TensorFlow models
 '''
 
 # ====================================================================================================
@@ -31,7 +29,7 @@ class B_frame_CNN(tf.keras.Model):
         self.c4 = tf.keras.layers.Conv2D(256, filter_size, strides=2, activation=activation, padding=padding)
         self.c5 = tf.keras.layers.Conv2D(256, filter_size, strides=2, activation=activation, padding=padding)
 
-        # dense layer
+        # dense layers
         self.f1 = tf.keras.layers.Flatten()
         self.dropout1 = tf.keras.layers.Dropout(0.5)
         self.d1 = tf.keras.layers.Dense(64, activation=None, name="embedding") # get_embedding() returns the activation at this layer
@@ -54,7 +52,7 @@ class B_frame_CNN(tf.keras.Model):
         x = self.dropout2(x, training=True)
         return self.d2(x)
         
-    def model(self):
+    def model(self): # calling self.model() builds the network graph, allowing us to access intermediate layers
         inputs = tf.keras.Input(shape=(200,100,1))
         self.full_model = tf.keras.Model(inputs=[inputs], outputs=self.call(inputs))
         return self.full_model
@@ -75,13 +73,13 @@ class texture_CNN(tf.keras.Model):
         # convolutional layers
         self.c1 = tf.keras.layers.Conv2D(32, filter_size, strides=2, activation=activation, padding=padding)
         self.p1 = tf.keras.layers.MaxPooling2D(filter_size, strides=2)
-        self.c2 = tf.keras.layers.Conv2D(32, filter_size, strides=2, activation=activation, padding=padding, name="gradmaps")
+        self.c2 = tf.keras.layers.Conv2D(32, filter_size, strides=2, activation=activation, padding=padding, name="gradmaps") # get_gradcam() returns the activation at this layer
         self.p2 = tf.keras.layers.MaxPooling2D(filter_size, strides=2)
         self.c3 = tf.keras.layers.Conv2D(32, filter_size, strides=2, activation=activation, padding=padding)
         self.c4 = tf.keras.layers.Conv2D(16, filter_size, strides=2, activation=None, padding=padding)
 
         # dense layers
-        self.f1 = tf.keras.layers.Flatten(name="embedding")
+        self.f1 = tf.keras.layers.Flatten(name="embedding") # get_embedding() returns the activation at this layer
         self.dropout1 = tf.keras.layers.Dropout(0.5)
         self.d1 = tf.keras.layers.Dense(2, activation='softmax')
         self.full_model = None
@@ -98,12 +96,12 @@ class texture_CNN(tf.keras.Model):
         x = self.dropout1(x, training=True)
         return self.d1(x)
         
-    def model(self):
+    def model(self): # calling self.model() builds the network graph, allowing us to access intermediate layers
         inputs = tf.keras.Input(shape=(100,100,1))
         self.full_model = tf.keras.Model(inputs=[inputs], outputs=self.call(inputs))
         return self.full_model
 
-    def get_embedding(self): # calling self.model() builds the network connections, allowing us to access intermediate layers
+    def get_embedding(self):
         intermediate = tf.keras.models.Model(inputs=self.model().input, outputs=self.full_model.get_layer("embedding").output)
         return intermediate
 
@@ -122,7 +120,7 @@ class ensemble_MLP(tf.keras.Model):
 
     def call(self, inputs):
         x = self.hidden(inputs)
-        x = self.dropout1(x, training=True)
+        x = self.dropout1(x, training=True) # keeps dropout active during inference
         return self.result(x)
 
     def model(self):

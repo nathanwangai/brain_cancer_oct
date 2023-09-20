@@ -1,7 +1,6 @@
 import gc
 import os
 import numpy as np
-from sklearn.utils import shuffle
 from project_scripts.neural_networks import B_frame_CNN, texture_CNN
 from project_scripts.pre_processing import process_bframe, slice_bframe, normalize, extract_edge, convert_to_texture
 
