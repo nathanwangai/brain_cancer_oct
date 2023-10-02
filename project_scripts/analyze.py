@@ -5,6 +5,12 @@ import tensorflow as tf
 import matplotlib.pyplot as plt
 from skimage.transform import resize
 
+'''
+Plots the training and validation accuracy of the models over epochs
+
+title: title of the plot
+log_fpath: path to the csv file containing training history
+'''
 def plot_training_curves(log_fpath, title):
     logs = pd.read_csv(log_fpath).drop(['loss', 'val_loss'], axis=1).set_index('epoch')
     plt.plot(logs)
@@ -13,6 +19,11 @@ def plot_training_curves(log_fpath, title):
     plt.title(title)
     plt.legend(logs.columns)
 
+'''
+model_fpath: file path to the saved model
+X_data:
+Y_data:
+'''
 def model_uncertainty(model_fpath, X_data, Y_data):
     accuracy_arr = []
     tpr_arr = []
@@ -36,6 +47,12 @@ def model_uncertainty(model_fpath, X_data, Y_data):
     
     return mu_acc, std_acc, mu_tpr, mu_tnr
 
+'''
+Displays predicted cancer map of a volumetric OCT scan by evaluating one slice/texture pair at a time
+
+X_data: 
+model_fpath:
+'''
 def cancer_segmentation(X_data, model_fpath):
     model = tf.keras.models.load_model(model_fpath)
     seg_map = model.predict(X_data) > 0.5

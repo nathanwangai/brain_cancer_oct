@@ -20,21 +20,22 @@ def explore_dataset_widget(plotting_func):
     max_frame_idx = len(os.listdir(os.path.join(class_dir.value, sample_dir.value)))-1
     slice_idx = widgets.IntSlider(value=0, min=0, max=6)
     frame_idx = widgets.IntSlider(value=0, min=0, max=max_frame_idx)
+    
+    # run callback function when widgets are interacted with
+    class_dir.observe(update_sample_dir, names='value')
+    class_dir.observe(update_max_frame_idx, names='value')
+    sample_dir.observe(update_max_frame_idx, names='value')
 
-    def update_sample_dir(change):
+    # callback functions
+    def update_sample_dir(change): # link sample_dir's options to class_dir choice
         sample_dir.options = os.listdir(change['new'])
         sample_dir.value = sample_dir.options[0]
 
-    def update_max_frame_idx(change):
+    def update_max_frame_idx(change): #
         dir1, dir2 = (class_dir.value, change['new'])
         if change['owner'] == class_dir: dir1, dir2 = (change['new'], sample_dir.value)
 
         frame_idx.max = len(os.listdir(os.path.join(dir1, dir2))) - 1
-    
-    # run callback function when widgets change
-    class_dir.observe(update_sample_dir, names='value')
-    class_dir.observe(update_max_frame_idx, names='value')
-    sample_dir.observe(update_max_frame_idx, names='value')
 
     return widgets.interactive(plotting_func, 
                                slice_idx=slice_idx, 
@@ -45,12 +46,9 @@ def explore_dataset_widget(plotting_func):
 # ====================================================================================================
 
 '''
-Plots bframe, slice, and texture side-by-side
+Used with explore_dataset_widget(), which provides all the parameters
 
-slice_idx: 
-frame_idx: 
-class_dir: 
-sample_dir: 
+Plots bframe, slice, and texture side-by-side
 '''
 def plot_data(slice_idx, frame_idx, class_dir, sample_dir):
     dir_path = os.path.join(class_dir, sample_dir)
@@ -90,8 +88,8 @@ def plot_data(slice_idx, frame_idx, class_dir, sample_dir):
 '''
 Plays a video of the dataset
 
-X_data:
-Y_data:
+X_data: training examples (slices or textures)
+Y_data: labels
 '''
 def dataset_movie_widget(X_data, Y_data):
     X_data, Y_data = shuffle(X_data, Y_data)
@@ -100,7 +98,7 @@ def dataset_movie_widget(X_data, Y_data):
     slider_idx = widgets.IntSlider(max=num_training_ex)
     widgets.jslink((play_idx, 'value'), (slider_idx, 'value'))
 
-    def my_func(idx, slider_idx):
+    def my_func(idx, slider_idx): # plots training example with label
         plt.figure(figsize=(3,3))
         plt.axis('off')
         plt.imshow(X_data[idx], cmap='gray')
